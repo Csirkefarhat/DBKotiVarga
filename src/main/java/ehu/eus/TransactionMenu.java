@@ -19,8 +19,11 @@ public class TransactionMenu {
                 case 1 -> query1(conn);
                 case 2 -> query2(conn);
                 case 3 -> query3(conn);
-                case 4 -> transaction1(conn);
-                case 5 -> transaction2(conn);
+                case 4 -> query4(conn);
+                case 5 -> query5(conn);
+                case 6 -> query6(conn);
+                case 7 -> transaction1(conn);
+                case 8 -> transaction2(conn);
                 case 0 -> { running = false; System.out.println("Bye!"); }
                 default -> System.out.println("Invalid option, try again.");
             }
@@ -34,11 +37,14 @@ public class TransactionMenu {
         System.out.println("║  QUERIES                                      ║");
         System.out.println("║  1. Employees above dept avg salary           ║");
         System.out.println("║  2. Restaurants with revenue above avg        ║");
-        System.out.println("║  3. Customers who booked only Donostia trips  ║");
+        System.out.println("║  3. Customers who booked only Donostia trips  ║");                                 
+        System.out.println("║  4. Employees above avg salary                ║");
+        System.out.println("║  5. Cities with more than 2 restaurants       ║");
+        System.out.println("║  6. Restaurants serving dishes above 20 euros ║");
         System.out.println("╠═══════════════════════════════════════════════╣");
         System.out.println("║  TRANSACTIONS                                 ║");
-        System.out.println("║  4. Add tour guide + language (INSERT)        ║");
-        System.out.println("║  5. Promote employee to manager (UPDATE)      ║");
+        System.out.println("║  7. Add tour guide + language (INSERT)        ║");
+        System.out.println("║  8. Promote employee to manager (UPDATE)      ║");
         System.out.println("╠═══════════════════════════════════════════════╣");
         System.out.println("║  0. Exit                                      ║");
         System.out.println("╚═══════════════════════════════════════════════╝");
@@ -74,6 +80,18 @@ public class TransactionMenu {
             System.err.println("[ERROR] Query failed: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    private static void query4(Connection conn) {
+            Queries.employeesAboveAverageSalary(conn);
+    }
+
+    private static void query5(Connection conn) {
+        Queries.restaurantsByCity(conn);
+    }
+
+    private static void query6(Connection conn) {
+        Queries.expensiveRestaurants(conn);
     }
 
     private static void transaction1(Connection conn) {
