@@ -162,6 +162,18 @@ public class Transactions {
                 System.out.println("Rollback failed: " + ex.getMessage());
             }
         }
+        finally {
+
+            try {
+                if (conn != null) {
+                conn.setAutoCommit(true);
+                }
+
+            } catch (SQLException ex) {
+
+                System.out.println("Error resetting auto-commit: "+ ex.getMessage());
+            }
+        }
     }
 
     public static void increaseITSalaries(Connection conn) {
@@ -197,6 +209,17 @@ public class Transactions {
         } catch (SQLException e) {
 
             System.out.println("Transaction failed: " + e.getMessage());
+        } finally {
+
+            try {
+                if (conn != null) {
+                    conn.setAutoCommit(true);
+                }
+
+            } catch (SQLException ex) {
+
+                System.out.println("Error resetting auto-commit: " + ex.getMessage());
+            }
         }
     }
 }
