@@ -7,8 +7,8 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
-public class Main {
-    public static void main(String[] args) {
+public class MyDBConnection {
+    public static Connection getConnection() {
         Connection conn = null;
 		try {
 			Class.forName("com.mysql.cj.jdbc.Driver");
@@ -19,32 +19,38 @@ public class Main {
 					config.getProperty("db.username"),
 					config.getProperty("db.password")
 			);
-			System.out.println(" --> Connection Established"); 
+			System.out.println(" --> Connection Established");
+			return conn;
 
 		} catch (SQLException ex) {
 			System.out.println("SQLException: " + ex.getMessage());
 			System.out.println("SQLState: " + ex.getSQLState());
 			System.out.println("VendorError: " + ex.getErrorCode());
 			System.out.println("ooops  --> Connection Failed");
+			return null;
 		} catch (IOException ex) {
 			System.out.println(ex.getMessage());
+			return null;
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
-		} finally {
+			return null;
+		} 
+    }
+
+	public static void closeConnection(Connection conn) {
+		if (conn != null) {
 			try {
-				if (conn != null)
-					conn.close();
+				conn.close();
 				System.out.println(" --> Connection Closed");
 			} catch (SQLException e) {
-				System.out.println("ooops  --> Closing the Connection Failed");
+				System.out.println("Error closing connection: " + e.getMessage());
 			}
-
 		}
-    }
+	}
 
 	private static Properties loadDatabaseConfig() throws IOException {
 		Properties properties = new Properties();
-		try (InputStream inputStream = Main.class.getClassLoader().getResourceAsStream("db.properties")) {
+		try (InputStream inputStream = MyDBConnection.class.getClassLoader().getResourceAsStream("db.properties")) {
 			if (inputStream == null) {
 				throw new IOException("Missing db.properties on the classpath");
 			}
