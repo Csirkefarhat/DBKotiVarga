@@ -47,6 +47,8 @@ public class TransactionMenu {
         System.out.println("║  TRANSACTIONS                                 ║");
         System.out.println("║  7. Add tour guide + language (INSERT)        ║");
         System.out.println("║  8. Promote employee to manager (UPDATE)      ║");
+        System.out.println("║  9. Add dish and restaurant serving (INSERT)  ║");
+        System.out.println("║  10. Pay raise for IT employees by 10%(UPDATE)║");
         System.out.println("╠═══════════════════════════════════════════════╣");
         System.out.println("║  0. Exit                                      ║");
         System.out.println("╚═══════════════════════════════════════════════╝");
@@ -117,11 +119,19 @@ public class TransactionMenu {
     }
 
     private static void transaction3(Connection conn) {
-        // Implement transaction 3 logic here
+        Transactions.insertDishAndServe(
+            readString("Dish name: "),
+            readString("Cuisine: "),
+            readString("Category: "),
+            readString("Difficulty: "),
+            readString("Restaurant name: "),
+            readDouble("Price: "),
+            conn
+        );
     }
 
     private static void transaction4(Connection conn) {
-        // Implement transaction 4 logic here
+        Transactions.increaseITSalaries(conn);
     }
 
 
