@@ -24,6 +24,8 @@ public class TransactionMenu {
                 case 6 -> query6(conn);
                 case 7 -> transaction1(conn);
                 case 8 -> transaction2(conn);
+                case 9 -> transaction3(conn);
+                case 10 -> transaction4(conn);
                 case 0 -> { running = false; System.out.println("Bye!"); }
                 default -> System.out.println("Invalid option, try again.");
             }
@@ -112,6 +114,14 @@ public class TransactionMenu {
             readDouble("New salary: "),
             conn
         );
+    }
+
+    private static void transaction3(Connection conn) {
+        // Implement transaction 3 logic here
+    }
+
+    private static void transaction4(Connection conn) {
+        // Implement transaction 4 logic here
     }
 
 
