@@ -57,7 +57,7 @@ public class Queries {
         }
     }
 
-    public static void queryCustomersAllMadridTrips(Connection conn) throws SQLException, ClassNotFoundException {
+    public static void queryCustomersAllDonostiaTrips(Connection conn) throws SQLException, ClassNotFoundException {
         String sql = """
             SELECT c.CustomerId, c.custname
             FROM customer c

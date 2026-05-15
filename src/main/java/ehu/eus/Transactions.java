@@ -47,6 +47,9 @@ public class Transactions {
                 }
             } catch (SQLException ex) {
                 System.out.println("Rollback failed: " + ex.getMessage());
+            }finally {
+                try { if (conn != null) conn.setAutoCommit(true); }
+                catch (SQLException ex) { System.out.println("Error resetting auto-commit: " + ex.getMessage()); }
             }
         }
     }
@@ -78,6 +81,9 @@ public class Transactions {
             System.out.println("Transaction failed: " + e.getMessage());
             try { if (conn != null) conn.rollback(); System.out.println("Rolled back."); }
             catch (SQLException ex) { System.out.println("Rollback error: " + ex.getMessage()); }
+        }finally {
+            try { if (conn != null) conn.setAutoCommit(true); }
+            catch (SQLException ex) { System.out.println("Error resetting auto-commit: " + ex.getMessage()); }
         }
     }
 }
