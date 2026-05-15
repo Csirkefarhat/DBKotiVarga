@@ -2,6 +2,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+
 import ehu.eus.MyDBConnection;
 import ehu.eus.Queries;
 import ehu.eus.Transactions;
@@ -23,6 +24,8 @@ public class TestRunner {
             testQueryCustomersOnlyDonostia(conn);
             testInsertGuideWithLanguage(conn);
             testPromoteToManager(conn);
+            testInsertDishAndServe(conn);
+            testIncreaseITSalaries(conn);
     
             System.out.println("\n╔══════════════════════════════════════════╗");
             System.out.printf( "║  Results: %d passed, %d failed            %n", passed, failed);
@@ -220,6 +223,179 @@ public class TestRunner {
             } catch (Exception e) {
                 fail("Exception: " + e.getMessage());
             } 
+        }
+
+        // ─────────────────────────────────────────────
+        //  TEST 6 — insertDishAndServe
+        //  Case A: successful insert
+        //  Case B: duplicate dish → rollback
+        //  Case C: invalid restaurant → partial rollback
+        // ─────────────────────────────────────────────
+        private static void testInsertDishAndServe(Connection conn) {
+
+            System.out.println("\n--- TEST 6: Insert dish and restaurant serving ---");
+
+            try {
+
+                // Cleanup from previous runs
+                cleanup(conn, "DELETE FROM serves WHERE dish IN ('T_PAELLA','T_PORKOLT')");
+                cleanup(conn, "DELETE FROM dishes WHERE dish IN ('T_PAELLA','T_PORKOLT')");
+
+                // Case A
+                System.out.println("  [Case A] Insert new dish T_PAELLA");
+
+                Transactions.insertDishAndServe(
+                    "T_PAELLA",
+                    "Spanish",
+                    "Main",
+                    "Medium",
+                    "LaCasa",
+                    25.0,
+                    conn
+                );
+
+                if (
+                    rowExists(conn,
+                    "SELECT 1 FROM dishes WHERE dish='T_PAELLA'")
+                    &&
+                    rowExists(conn,
+                    "SELECT 1 FROM serves WHERE dish='T_PAELLA'")
+                ) {
+
+                    pass("Case A: Dish and serving relation committed.");
+
+                } else {
+
+                    fail("Case A: Dish or serving relation missing.");
+                }
+
+                // Case B
+                System.out.println("  [Case B] Duplicate dish insert");
+
+                Transactions.insertDishAndServe(
+                    "T_PAELLA",
+                    "Spanish",
+                    "Main",
+                    "Medium",
+                    "LaCasa",
+                    25.0,
+                    conn
+                );
+
+                int dishCount = countRows(
+                    conn,
+                    "SELECT COUNT(*) FROM dishes WHERE dish='T_PAELLA'"
+                );
+
+                if (dishCount == 1) {
+
+                    pass("Case B: Duplicate dish rejected successfully.");
+
+                } else {
+
+                    fail("Case B: Duplicate dish inserted.");
+                }
+
+                // Case C
+                System.out.println("  [Case C] Invalid restaurant name");
+
+                Transactions.insertDishAndServe(
+                    "T_PORKOLT",
+                    "Hungarian",
+                    "Main",
+                "Easy",
+                "INVALID_RESTAURANT",
+                15.0,
+                conn
+                );
+
+                boolean dishExists = rowExists(
+                    conn,
+                    "SELECT 1 FROM dishes WHERE dish='T_PORKOLT'"
+                );
+
+                boolean servingExists = rowExists(
+                    conn,
+                    "SELECT 1 FROM serves WHERE dish='T_PORKOLT'"
+                );
+
+                if (dishExists && !servingExists) {
+
+                    pass("Case C: Partial rollback successful.");
+
+                } else {
+
+                    fail("Case C: Unexpected state after rollback.");
+                }
+
+            } catch (Exception e) {
+
+                fail("Exception: " + e.getMessage());
+            }
+        }
+
+        // ─────────────────────────────────────────────
+        //  TEST 7 — increaseITSalaries
+        //  Case A: valid IT department
+        //  Case B: no IT employees
+        // ─────────────────────────────────────────────
+        private static void testIncreaseITSalaries(Connection conn) {
+
+            System.out.println("\n--- TEST 7: Increase IT salaries ---");
+
+            try {
+
+                // Read original average salary
+                double before = getDouble(
+                    conn,
+                    """
+                    SELECT AVG(Salary)
+                    FROM employee
+                    WHERE Dno = (
+                        SELECT Dnumber
+                        FROM department
+                        WHERE Dname='IT'
+                    )
+                    """
+                );
+
+                // Execute transaction
+                Transactions.increaseITSalaries(conn);
+
+                // Read updated average salary
+                double after = getDouble(
+                    conn,
+                    """
+                    SELECT AVG(Salary)
+                    FROM employee
+                    WHERE Dno = (
+                        SELECT Dnumber
+                        FROM department
+                        WHERE Dname='IT'
+                    )
+                    """
+                );
+
+                if (after > before) {
+
+                    pass("Case A: IT salaries increased successfully.");
+                    cleanup(conn,
+                        "UPDATE employee " +
+                        "SET Salary = Salary / 1.10 " +
+                        "WHERE Dno = (" +
+                        "SELECT Dnumber FROM department WHERE Dname='IT')" +
+                        ")"
+                    );
+
+                } else {
+
+                    fail("Case A: Salaries were not increased.");
+                }
+
+            } catch (Exception e) {
+
+                fail("Exception: " + e.getMessage());
+            }
         }
     
         // ─────────────────────────────────────────────
