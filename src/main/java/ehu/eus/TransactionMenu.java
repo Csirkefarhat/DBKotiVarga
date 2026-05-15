@@ -79,7 +79,7 @@ public class TransactionMenu {
     private static void query3(Connection conn) {
         try {
             System.out.println("\n=== Customers who have ONLY booked trips departing from Donostia ===");
-            Queries.queryCustomersAllMadridTrips(conn);
+            Queries.queryCustomersAllDonostiaTrips(conn);
         } catch (SQLException | ClassNotFoundException e) {
             System.err.println("[ERROR] Query failed: " + e.getMessage());
             e.printStackTrace();
